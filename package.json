@@ -14,6 +14,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -22,7 +23,8 @@
     "fs.promises": "^0.1.2",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.13.0",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "eslint": "^9.0.0",
