@@ -19,18 +19,27 @@ export default [
   },
   {
     files: ['src/**/*.{js,jsx}'],
-    plugins: {
-      react: pluginReact,
-    },
     languageOptions: {
+      parser: require('@babel/eslint-parser'),
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
+        requireConfigFile: false,
+        babelOptions: {
+          presets: ['@babel/preset-react'],
+        },
       },
+      globals: {
+        ...globals.browser,
+      },
+    },
+    plugins: {
+      react: pluginReact,
     },
     rules: {
       ...pluginReact.configs.recommended.rules,
+      'react/prop-types': 'off',
     },
     settings: {
       react: {

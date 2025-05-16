@@ -1,33 +1,21 @@
+// middleware/auth.js
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 config();
 
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  console.log('Auth Header:', authHeader); // ดีบั๊ก header
-  if (!authHeader) {
-    return res.status(403).json({ message: 'ไม่พบโทเค็น' });
-  }
-
-  const token = authHeader.split(' ')[1];
-  console.log('Token:', token); // ดีบั๊ก token
+export const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
-    return res.status(403).json({ message: 'รูปแบบโทเค็นไม่ถูกต้อง' });
+    return res.status(401).json({ message: 'ไม่มี token' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      console.error('JWT Verify Error:', err.message); // ดีบั๊กข้อผิดพลาด
-      return res.status(401).json({
-        status: 'error',
-        code: 4010,
-        message: 'โทเค็นไม่ถูกต้องหรือหมดอายุ'
-      });
-    }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    console.log('Decoded User:', decoded); // ดีบั๊กข้อมูลผู้ใช้
+    console.log('Decoded token:', decoded);
     next();
-  });
+  } catch (error) {
+    console.error('Token verification error:', error);
+    return res.status(401).json({ message: 'token ไม่ถูกต้อง' });
+  }
 };
-
-export { verifyToken };
