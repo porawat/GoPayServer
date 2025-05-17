@@ -1,4 +1,3 @@
-//routes/auth.js
 import express from 'express';
 import { login, getProfile, changePassword, updateProfile, getDashboard, getSettings, getmembers } from '../controllers/authController.js';
 import { createshop, getmyshop } from '../controllers/shopController.js';
@@ -13,7 +12,5 @@ router.put('/profile', verifyToken, updateProfile);
 router.get('/dashboard', verifyToken, getDashboard);
 router.get('/settings', verifyToken, getSettings);
 router.get('/members', verifyToken, getmembers);
-router.post('/createshop', verifyToken, createshop);
-router.post('/getmyshop', verifyToken, getmyshop);
 
 export default router;

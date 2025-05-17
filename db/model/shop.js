@@ -1,25 +1,67 @@
-export default (sequelize, Sequelize) => {
-    const shopModel = sequelize.define(
-        'shop',
-        {
-            id: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV4, field: 'id' },
-            slug_id: { type: Sequelize.STRING(50), allowNull: false, field: 'slug_id' },
-            owner_id: { type: Sequelize.STRING(100), allowNull: false, field: 'owner_id' },
-            shop_name: { type: Sequelize.STRING(150), allowNull: false, field: 'shop_name' },
-            shop_tel: { type: Sequelize.STRING(50), allowNull: true, field: 'shop_tel' },
-            contact_name: { type: Sequelize.STRING(150), allowNull: true, field: 'contact_name' },
-            email: { type: Sequelize.STRING(150), allowNull: true, field: 'email' },
-            avatar: { type: Sequelize.STRING(250), allowNull: true, field: 'avatar' },
-            cover: { type: Sequelize.STRING(250), allowNull: true, field: 'cover' },
-            is_active: { type: Sequelize.STRING(150), allowNull: false, field: 'is_active' },
-            created_at: { type: Sequelize.DATE, allowNull: false, field: 'created_at', defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
-            updated_at: { type: Sequelize.DATE, allowNull: false, field: 'updated_at' },
-            deleted_at: { type: Sequelize.DATE, allowNull: true, field: 'deleted_at' },
-        },
-        {
-            tableName: 'shop'
-        }
-    );
+//model/shop.js
+import { DataTypes } from 'sequelize';
 
-    return shopModel;
-}
+export default (sequelize, Sequelize) => {
+  const Shop = sequelize.define('shop', {
+    id: {
+      type: DataTypes.CHAR(36),
+      defaultValue: Sequelize.UUIDV4,
+      primaryKey: true,
+    },
+    slug_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    owner_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    shop_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    shop_tel: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    contact_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    avatar: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    cover: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    is_active: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'ACTIVE',
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+  }, {
+    tableName: 'shop',
+    timestamps: false,
+  });
+
+  return Shop;
+};
