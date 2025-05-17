@@ -115,6 +115,8 @@ const getShopById = async (req, res) => {
 
 const updateShop = async (req, res) => {
   const { shopId } = req.params;
+
+  console.log('shopId:', shopId);
   const { shopSlugId, shopName, tel, contact_person, email } = req.body;
   const userId = req.user?.id;
 
@@ -136,34 +138,44 @@ const updateShop = async (req, res) => {
 
     const avatar = req.files?.avatar || null;
     const cover = req.files?.cover || null;
-    let avatar_image = shopData.avatar;
-    let cover_image = shopData.cover;
+
+
+    console.log('avatar:', avatar);
+    console.log('cover:', cover);
+    let avatar_image = shopData?.avatar || null;
+    let cover_image = shopData?.cover || null;
 
     // ลบภาพเก่าถ้ามีการอัปโหลดภาพใหม่
     const uploadDir = path.resolve(__dirname, '../Uploads');
-    if (avatar && shopData.avatar) {
+    if (avatar) {
       try {
-        await fs.unlink(path.join(uploadDir, shopData.avatar));
+        if (shopData?.avatar) {
+          await fs.unlink(path.join(uploadDir, shopData.avatar));
+        }
+        avatar_image = await uploadimage(avatar, `${shopId}_avatar`);
       } catch (err) {
         console.warn('ไม่สามารถลบภาพ avatar เก่าได้:', err);
       }
-      avatar_image = await uploadimage(avatar, `${shopId}_avatar`);
     }
-    if (cover && shopData.cover) {
+    if (cover) {
       try {
-        await fs.unlink(path.join(uploadDir, shopData.cover));
+        if (shopData?.cover) {
+          await fs.unlink(path.join(uploadDir, shopData?.cover));
+        }
+        cover_image = await uploadimage(cover, `${shopId}_cover`);
       } catch (err) {
         console.warn('ไม่สามารถลบภาพ cover เก่าได้:', err);
       }
-      cover_image = await uploadimage(cover, `${shopId}_cover`);
-    }
 
+    }
+    console.log('avatar_image:', avatar_image);
+    console.log('cover_image:', cover_image);
     await shopData.update({
-      slug_id: shopSlugId || shopData.slug_id,
-      shop_name: shopName || shopData.shop_name,
-      shop_tel: tel || shopData.shop_tel,
-      contact_name: contact_person || shopData.contact_name,
-      email: email || shopData.email,
+      slug_id: shopSlugId || shopData?.slug_id,
+      shop_name: shopName || shopData?.shop_name,
+      shop_tel: tel || shopData?.shop_tel,
+      contact_name: contact_person || shopData?.contact_name,
+      email: email || shopData?.email,
       avatar: avatar_image,
       cover: cover_image,
       updated_at: new Date(),

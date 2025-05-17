@@ -4,7 +4,8 @@ import { DataTypes } from 'sequelize';
 export default (sequelize, Sequelize) => {
   const Shop = sequelize.define('shop', {
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.CHAR(36),
+      defaultValue: Sequelize.UUIDV4,
       primaryKey: true,
     },
     slug_id: {

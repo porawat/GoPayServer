@@ -17,15 +17,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const { sequelize } = db;
 
-// async function syncDatabase() {
-//   try {
-//     await sequelize.sync({ alter: true });
-//     console.log('Database synchronized successfully.');
-//   } catch (error) {
-//     console.error('Error synchronizing database:', error);
-//   }
-// }
-// syncDatabase();
+async function syncDatabase() {
+  try {
+    await sequelize.sync({ alter: true });
+    console.log('Database synchronized successfully.');
+  } catch (error) {
+    console.error('Error synchronizing database:', error);
+  }
+}
+syncDatabase();
 
 const app = express();
 
@@ -36,9 +36,9 @@ app.use(fileUpload());
 app.use('/files/uploads', express.static(path.join(__dirname, 'Uploads')));
 
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
+  //  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  // console.log('Headers:', req.headers);
+  //  console.log('Body:', req.body);
   next();
 });
 
