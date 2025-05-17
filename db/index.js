@@ -1,9 +1,10 @@
-// db/index.js
 import { Sequelize } from 'sequelize';
 import shopModel from './model/shop.js';
 import employeeModel from './model/employee.js';
 import employeeRoleModel from './model/employee_roles.js';
 import userModel from './model/user.js';
+import ProductMasterModel from './model/product_master.js';
+import ProductModel from './model/product.js';
 import { config } from 'dotenv';
 config();
 
@@ -33,10 +34,17 @@ db.shop = shopModel(sequelize, Sequelize);
 db.employee = employeeModel(sequelize, Sequelize);
 db.employeeRole = employeeRoleModel(sequelize, Sequelize);
 db.user = userModel(sequelize, Sequelize);
+db.productmaster = ProductMasterModel(sequelize, Sequelize);
+db.product = ProductModel(sequelize, Sequelize);
 
+// Existing associations
 db.employee.hasMany(db.employeeRole, { as: 'roles', foreignKey: 'employee_id' });
 db.employeeRole.belongsTo(db.employee, { foreignKey: 'employee_id' });
 db.employee.belongsTo(db.shop, { foreignKey: 'shop_id' });
+
+// New associations for product
+db.product.belongsTo(db.productmaster, { foreignKey: 'product_id', targetKey: 'product_id' });
+db.product.belongsTo(db.shop, { foreignKey: 'shop_id', targetKey: 'id' });
 
 db.testConnection = async () => {
   try {
@@ -52,6 +60,5 @@ db.testConnection().catch((error) => {
   console.error('Failed to initialize database connection:', error);
   process.exit(1);
 });
-
 
 export default db;
