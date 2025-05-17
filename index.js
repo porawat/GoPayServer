@@ -8,6 +8,7 @@ import { config } from 'dotenv';
 import authRoutes from './routes/auth.js';
 import fileRoutes from './routes/file.js';
 import shopRoutes from './routes/shop.js';
+import productRoutes from './routes/product.js';
 import employeeRoutes from './routes/employee.js';
 import db from './db/index.js';
 
@@ -46,6 +47,7 @@ app.use('/', authRoutes);
 app.use('/files', fileRoutes);
 app.use('/shop', shopRoutes);
 app.use('/employees', employeeRoutes);
+app.use('/product', productRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
