@@ -27,10 +27,8 @@ const sequelize = new Sequelize(
 );
 
 const db = {};
-
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
-
 db.shop = shopModel(sequelize, Sequelize);
 db.employee = employeeModel(sequelize, Sequelize);
 db.employeeRole = employeeRoleModel(sequelize, Sequelize);
