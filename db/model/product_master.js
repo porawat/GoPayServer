@@ -48,6 +48,10 @@ export default (sequelize, Sequelize) => {
             allowNull: true,
             collate: 'utf8mb4_unicode_ci',
         },
+        status: {
+            type: DataTypes.STRING,
+            defaultValue: 'ACTIVE',
+        },
         created_at: {
             type: DataTypes.DATE(3), // Datetime with millisecond precision
             allowNull: false,
@@ -58,6 +62,12 @@ export default (sequelize, Sequelize) => {
             allowNull: false,
             defaultValue: Sequelize.literal('CURRENT_TIMESTAMP(3)'),
             onUpdate: Sequelize.literal('CURRENT_TIMESTAMP(3)'), // Update timestamp on record update
+        },
+        deleted_at: {
+            type: DataTypes.DATE(3), // Datetime with millisecond precision
+            allowNull: true,
+            defaultValue: null,
+            onDelete: 'SET NULL', // Set to null on delete
         },
     }, {
         // Model options
