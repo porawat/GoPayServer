@@ -57,4 +57,71 @@ const createProduct = async (req, res) => {
     }
 };
 
-export { getmyproduct, createProduct };
+const updateProduct = async (req, res) => {
+    const { product_id, product_name, price, description, shop_id, stock, is_active } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+        return res.status(401).json({ code: 401, message: 'ต้องล็อกอินเพื่ออัปเดตสินค้า' });
+    }
+
+    try {
+        const updatedProduct = await product.update(
+            { product_name, price, description, stock, updated_at: new Date(), is_active },
+            { where: { product_id, shop_id } }
+        );
+
+        if (updatedProduct[0] === 0) {
+            return res.status(404).json({
+                code: 404,
+                message: 'ไม่พบสินค้าที่ต้องการอัปเดต',
+            });
+        }
+
+        return res.status(200).json({
+            code: 1000,
+            message: 'อัปเดตสินค้าสำเร็จ',
+        });
+    } catch (error) {
+        console.error('ข้อผิดพลาดในการอัปเดตสินค้า:', error);
+        return res.status(500).json({
+            code: 500,
+            message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
+        });
+    }
+};
+const deleteProduct = async (req, res) => {
+    const { product_id, shop_id } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+        return res.status(401).json({ code: 401, message: 'ต้องล็อกอินเพื่ออัปเดตสินค้า' });
+    }
+    try {
+        const deletedProduct = await product.update({
+            deleted_at: new Date(),
+            is_active: 'INACTIVE',
+            where: { product_id, shop_id }
+        });
+
+        if (deletedProduct === 0) {
+            return res.status(404).json({
+                code: 404,
+                message: 'ไม่พบสินค้าที่ต้องการลบ',
+            });
+        }
+
+        return res.status(200).json({
+            code: 1000,
+            message: 'ลบสินค้าสำเร็จ',
+        });
+    } catch (error) {
+        console.error('ข้อผิดพลาดในการลบสินค้า:', error);
+        return res.status(500).json({
+            code: 500,
+            message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
+        });
+    }
+};
+// Export the functions to be used in routes    
+export { getmyproduct, createProduct, updateProduct, deleteProduct };
