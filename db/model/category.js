@@ -13,7 +13,10 @@ export default (sequelize, Sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-
+        cat_prefix: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         active: {
             type: DataTypes.STRING,
             allowNull: false,
