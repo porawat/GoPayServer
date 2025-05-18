@@ -23,7 +23,7 @@ export default (sequelize, Sequelize) => {
             collate: 'utf8mb4_unicode_ci',
         },
         category_id: {
-            type: DataTypes.STRING(100),
+            type: DataTypes.UUID,
             allowNull: true,
         },
         supplier_id: {

@@ -5,6 +5,7 @@ import employeeRoleModel from './model/employee_roles.js';
 import userModel from './model/user.js';
 import ProductMasterModel from './model/product_master.js';
 import ProductModel from './model/product.js';
+import categoryModel from './model/category.js';
 import { config } from 'dotenv';
 config();
 
@@ -36,7 +37,7 @@ db.employeeRole = employeeRoleModel(sequelize, Sequelize);
 db.user = userModel(sequelize, Sequelize);
 db.productmaster = ProductMasterModel(sequelize, Sequelize);
 db.product = ProductModel(sequelize, Sequelize);
-
+db.category = categoryModel(sequelize, Sequelize);
 // Existing associations
 db.employee.hasMany(db.employeeRole, { as: 'roles', foreignKey: 'employee_id' });
 db.employeeRole.belongsTo(db.employee, { foreignKey: 'employee_id' });
@@ -45,7 +46,7 @@ db.employee.belongsTo(db.shop, { foreignKey: 'shop_id' });
 // New associations for product
 db.product.belongsTo(db.productmaster, { foreignKey: 'product_id', targetKey: 'product_id' });
 db.product.belongsTo(db.shop, { foreignKey: 'shop_id', targetKey: 'id' });
-
+db.productmaster.belongsTo(db.category, { foreignKey: 'category_id', targetKey: 'category_id' });
 db.testConnection = async () => {
   try {
     await sequelize.authenticate();
