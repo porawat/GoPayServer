@@ -1,5 +1,5 @@
 import db from '../db/index.js';
-const { product, productmaster } = db;
+const { product, } = db;
 
 const getmyproduct = async (req, res) => {
     const userId = req.user?.id;
@@ -26,7 +26,7 @@ const getmyproduct = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-    const { product_name, product_id, price, productDescription, shop_id } = req.body;
+    const { product_name, product_id, price, description, shop_id } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -38,9 +38,8 @@ const createProduct = async (req, res) => {
             product_id: product_id,
             shop_id: shop_id,
             product_name: product_name,
-
             price: price,
-            description: productDescription,
+            description: description,
 
         });
 
@@ -58,40 +57,4 @@ const createProduct = async (req, res) => {
     }
 };
 
-
-const createProductMaster = async (req, res) => {
-    const { sku, name, description, category_id, supplier_id,
-        cost_price, selling_price, reorder_level, image_url } = req.body;
-    const userId = req.user?.id;
-
-    if (!userId) {
-        return res.status(401).json({ code: 401, message: 'ต้องล็อกอินเพื่อเพิ่มสินค้า' });
-    }
-
-    try {
-        const newProductMaster = await productmaster.create({
-            sku: sku,
-            name: name,
-            description: description,
-            category_id: category_id,
-            supplier_id: supplier_id,
-            cost_price: cost_price,
-            selling_price: selling_price,
-            reorder_level: reorder_level,
-            image_url: image_url,
-        });
-
-        return res.status(201).json({
-            code: 1000,
-            message: 'เพิ่มสินค้าสำเร็จ',
-            data: newProductMaster,
-        });
-    } catch (error) {
-        console.error('ข้อผิดพลาดในการเพิ่มสินค้า:', error);
-        return res.status(500).json({
-            code: 500,
-            message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
-        });
-    }
-};
-export { getmyproduct, createProduct, createProductMaster };
+export { getmyproduct, createProduct };
