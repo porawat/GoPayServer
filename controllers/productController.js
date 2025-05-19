@@ -34,13 +34,28 @@ const createProduct = async (req, res) => {
     }
 
     try {
+        // Check for existing product with same product_id and shop_id
+        const existingProduct = await product.findOne({
+            where: {
+                product_id: product_id,
+                shop_id: shop_id
+            }
+        });
+
+        if (existingProduct) {
+            return res.status(409).json({
+                code: 5000,
+                message: 'สินค้านี้มีอยู่ในร้านนี้แล้ว',
+                data: existingProduct
+            });
+        }
+
         const newProduct = await product.create({
             product_id: product_id,
             shop_id: shop_id,
             product_name: product_name,
             price: price,
             description: description,
-
         });
 
         return res.status(201).json({
@@ -51,7 +66,7 @@ const createProduct = async (req, res) => {
     } catch (error) {
         console.error('ข้อผิดพลาดในการเพิ่มสินค้า:', error);
         return res.status(500).json({
-            code: 500,
+            code: 5000,
             message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
         });
     }
