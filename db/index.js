@@ -6,6 +6,8 @@ import userModel from './model/user.js';
 import ProductMasterModel from './model/product_master.js';
 import ProductModel from './model/product.js';
 import categoryModel from './model/category.js';
+import shopConfigModel from './model/shop_config.js'; // เพิ่มโมเดล shop_config
+import customerModel from './model/customer.js'; // เพิ่มโมเดล customer
 import { config } from 'dotenv';
 config();
 
@@ -29,6 +31,8 @@ const sequelize = new Sequelize(
 const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
+
+// กำหนดโมเดล
 db.shop = shopModel(sequelize, Sequelize);
 db.employee = employeeModel(sequelize, Sequelize);
 db.employeeRole = employeeRoleModel(sequelize, Sequelize);
@@ -36,15 +40,25 @@ db.user = userModel(sequelize, Sequelize);
 db.productmaster = ProductMasterModel(sequelize, Sequelize);
 db.product = ProductModel(sequelize, Sequelize);
 db.category = categoryModel(sequelize, Sequelize);
-// Existing associations
+db.shop_config = shopConfigModel(sequelize, Sequelize); // เพิ่ม shop_config
+db.customer = customerModel(sequelize, Sequelize); // เพิ่ม customer
+
+// ความสัมพันธ์ที่มีอยู่
 db.employee.hasMany(db.employeeRole, { as: 'roles', foreignKey: 'employee_id' });
 db.employeeRole.belongsTo(db.employee, { foreignKey: 'employee_id' });
 db.employee.belongsTo(db.shop, { foreignKey: 'shop_id' });
 
-// New associations for product
 db.product.belongsTo(db.productmaster, { foreignKey: 'product_id', targetKey: 'product_id' });
 db.product.belongsTo(db.shop, { foreignKey: 'shop_id', targetKey: 'id' });
 db.productmaster.belongsTo(db.category, { foreignKey: 'category_id', targetKey: 'category_id' });
+
+// ความสัมพันธ์ใหม่สำหรับ shop_config และ customer
+db.shop_config.belongsTo(db.shop, { foreignKey: 'shop_id', as: 'shop' });
+db.shop.hasOne(db.shop_config, { foreignKey: 'shop_id', as: 'config' });
+
+db.customer.belongsTo(db.shop, { foreignKey: 'shop_id', as: 'shop' });
+db.shop.hasMany(db.customer, { foreignKey: 'shop_id', as: 'customers' });
+
 db.testConnection = async () => {
   try {
     await sequelize.authenticate();
