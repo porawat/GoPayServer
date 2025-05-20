@@ -13,6 +13,8 @@ import productRoutes from './routes/product.js';
 import productMasterRouter from './routes/productmasterRouter.js';
 import employeeRoutes from './routes/employee.js';
 import categoryRoutes from './routes/category.js';
+
+import customerRoutes from './routes/customerRouter.js';
 import db from './db/index.js';
 
 config();
@@ -45,6 +47,7 @@ app.use('/employees', employeeRoutes);
 app.use('/product', productRoutes);
 app.use('/productmaster', productMasterRouter);
 app.use('/category', categoryRoutes);
+app.use('/customer', customerRoutes);
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
