@@ -17,11 +17,11 @@ export default (sequelize) => {
       allowNull: true,
     },
     latitude: {
-      type: DataTypes.DECIMAL(10, 8),
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
     longitude: {
-      type: DataTypes.DECIMAL(11, 8),
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
     open_time: {

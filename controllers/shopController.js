@@ -210,6 +210,7 @@ const updateShop = async (req, res) => {
         deleted_at: null,
       },
     });
+
     if (!shopData) {
       return res.status(404).json({ code: 404, message: 'ไม่พบร้านค้าที่ระบุหรือคุณไม่มีสิทธิ์' });
     }
@@ -248,7 +249,7 @@ const updateShop = async (req, res) => {
       }
     }
 
-    await shopData.update({
+    await shop.update({
       slug_id: shopSlugId || shopData.slug_id,
       shop_name: shopName || shopData.shop_name,
       shop_tel: tel !== undefined ? tel : shopData.shop_tel,
@@ -257,9 +258,15 @@ const updateShop = async (req, res) => {
       avatar: avatar_image,
       cover: cover_image,
       updated_at: new Date(),
-    });
+    },
+    { where :{
+        id:shopId
+      }}
+     
+    
+  );
 
-    await shopConfigData.update({
+    await shop_config.update({
       address: address !== undefined ? address : shopConfigData.address,
       latitude: latitude !== undefined ? parseFloat(latitude) : shopConfigData.latitude,
       longitude: longitude !== undefined ? parseFloat(longitude) : shopConfigData.longitude,
@@ -272,7 +279,9 @@ const updateShop = async (req, res) => {
       currency: currency || shopConfigData.currency,
       theme: theme || shopConfigData.theme,
       updated_at: new Date(),
-    });
+    },   { where :{
+        shop_id:shopId}}
+      );
 
     return res.status(200).json({
       code: 1000,
