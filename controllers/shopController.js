@@ -141,16 +141,14 @@ const createshop = async (req, res) => {
 };
 
 const getShopById = async (req, res) => {
+
   const { shopId } = req.params;
-  const userId = req.user?.id;
-  if (!userId) {
-    return res.status(401).json({ code: 401, message: 'ต้องล็อกอินเพื่อดึงข้อมูลร้านค้า' });
-  }
+  console.log('shopId:', shopId);
   try {
     const shopData = await shop.findOne({
       where: {
         id: shopId,
-        owner_id: userId,
+
         deleted_at: null,
       },
       attributes: ['id', 'shop_name', 'slug_id', 'shop_tel', 'contact_name', 'email', 'avatar', 'cover'],
@@ -185,7 +183,7 @@ const getShopById = async (req, res) => {
   } catch (error) {
     console.error('ข้อผิดพลาดในการดึงข้อมูลร้านค้า:', error);
     return res.status(500).json({
-      code: 500,
+      code: 5000,
       message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
     });
   }
