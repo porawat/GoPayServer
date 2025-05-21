@@ -14,6 +14,7 @@ router.use((req, res, next) => {
 router.post('/getmyshop', verifyToken, getmyshop);
 router.post('/createshop', verifyToken, createshop);
 router.get('/:shopId', getShopById);
-router.put('/updateshop/:shopId', verifyToken, updateShop);
+router.put('/:shopId', verifyToken, updateShop);
+
 
 export default router;
