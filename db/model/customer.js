@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+
 export default (sequelize) => {
   const Customer = sequelize.define('customer', {
     id: {
@@ -22,6 +23,10 @@ export default (sequelize) => {
     phone: {
       type: DataTypes.STRING(255),
       allowNull: true,
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
     address: {
       type: DataTypes.TEXT,
