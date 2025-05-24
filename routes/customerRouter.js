@@ -15,6 +15,8 @@ const router = express.Router();
 
 // Middleware เพื่อตรวจสอบว่าเป็นเจ้าของร้าน
 const restrictToShopOwner = (req, res, next) => {
+    console.log("params ", req.params);
+    console.log("user ", req.user);
     if (!req.user || !req.user.shopId || req.user.shopId !== req.params.shop_id) {
         return res.status(403).json({
             code: 4030,
@@ -31,10 +33,10 @@ router.post('/', createCustomer);
 router.get('/:id', getCustomer);
 
 // ดึงลูกค้าทั้งหมดของร้าน (ต้องล็อกอินและเป็นเจ้าของร้าน)
-router.get('/all/:shop_id', verifyToken, restrictToShopOwner, getAllcustomer);
+router.get('/all/:shop_id', verifyToken, getAllcustomer);
 
 // ดึงลูกค้าที่รอการอนุมัติ (ต้องล็อกอินและเป็นเจ้าของร้าน)
-router.get('/pending/:shop_id', verifyToken, restrictToShopOwner, getPendingCustomers);
+router.get('/pending/:shop_id', verifyToken, getPendingCustomers);
 
 // อัปเดตข้อมูลลูกค้า (ต้องล็อกอิน)
 router.put('/:id', verifyToken, updateCustomer);

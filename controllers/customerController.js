@@ -210,11 +210,11 @@ const getPendingCustomers = async (req, res) => {
 
     try {
         // ตรวจสอบว่า shop_id ตรงกับ user_id
-        const shopExists = await shop.findOne({ 
-            where: { 
+        const shopExists = await shop.findOne({
+            where: {
                 id: shop_id,
-                user_id 
-            } 
+                user_id
+            }
         });
         if (!shopExists) {
             return res.status(403).json({
@@ -249,12 +249,12 @@ const getPendingCustomers = async (req, res) => {
 
 const getCustomer = async (req, res) => {
     const id = req.params.id;
-    const user_id = req.user.id;
+    const user_id = req?.user?.id;
 
     try {
         const customerData = await customer.findOne({
             where: { id, is_active: 'ACTIVE' },
-            include: [{ model: shop, where: { user_id } }], // ตรวจสอบว่า shop นี้เป็นของผู้ใช้
+            //include: [{ model: shop, where: { user_id } }], // ตรวจสอบว่า shop นี้เป็นของผู้ใช้
         });
 
         if (!customerData) {
@@ -297,11 +297,10 @@ const getAllcustomer = async (req, res) => {
 
     try {
         // ตรวจสอบว่า shop_id ตรงกับ user_id
-        const shopExists = await shop.findOne({ 
-            where: { 
-                id: shop_id,
-                user_id 
-            } 
+        const shopExists = await shop.findOne({
+            where: {
+                id: shop_id
+            }
         });
         if (!shopExists) {
             return res.status(403).json({
@@ -371,11 +370,11 @@ const updateCustomer = async (req, res) => {
         }
 
         if (req.body.shop_id) {
-            const shopExists = await shop.findOne({ 
-                where: { 
+            const shopExists = await shop.findOne({
+                where: {
                     id: req.body.shop_id,
-                    user_id 
-                } 
+                    user_id
+                }
             });
             if (!shopExists) {
                 return res.status(403).json({
