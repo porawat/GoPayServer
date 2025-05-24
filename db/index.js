@@ -1,3 +1,4 @@
+//db/index.js
 import { Sequelize } from 'sequelize';
 import shopModel from './model/shop.js';
 import employeeModel from './model/employee.js';
