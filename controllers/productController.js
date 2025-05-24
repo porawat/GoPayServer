@@ -19,7 +19,7 @@ const getmyproduct = async (req, res) => {
     } catch (error) {
         console.error('ข้อผิดพลาดในการดึงข้อมูลร้านค้า:', error);
         return res.status(500).json({
-            code: 500,
+            code: 5000,
             message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
         });
     }
@@ -100,7 +100,7 @@ const updateProduct = async (req, res) => {
     } catch (error) {
         console.error('ข้อผิดพลาดในการอัปเดตสินค้า:', error);
         return res.status(500).json({
-            code: 500,
+            code: 5000,
             message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
         });
     }
@@ -133,10 +133,29 @@ const deleteProduct = async (req, res) => {
     } catch (error) {
         console.error('ข้อผิดพลาดในการลบสินค้า:', error);
         return res.status(500).json({
-            code: 500,
+            code: 5000,
             message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
         });
     }
 };
-// Export the functions to be used in routes    
-export { getmyproduct, createProduct, updateProduct, deleteProduct };
+const productDetail = async (req, res) => {
+    const { product_id, shop_id } = req.body;
+    try {
+        const products = await product.findOne({
+            where: { shop_id: shop_id, product_id: product_id },
+
+        });
+        return res.status(200).json({
+            code: 1000,
+            datarow: products || [],
+        });
+    } catch (error) {
+        console.error('ข้อผิดพลาดในการดึงข้อมูลร้านค้า:', error);
+        return res.status(500).json({
+            code: 5000,
+            message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
+        });
+    }
+};
+
+export { getmyproduct, createProduct, updateProduct, deleteProduct, productDetail };
