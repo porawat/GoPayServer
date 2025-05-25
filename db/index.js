@@ -26,6 +26,12 @@ const sequelize = new Sequelize(
       timestamps: false,
     },
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    pool: {
+      max: 10,     // สูงสุด 10 connections ต่อ user
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
   }
 );
 
