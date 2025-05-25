@@ -1,4 +1,4 @@
-// config/db.js (ปรับให้ Sequelize)
+// config/db.js
 import { Sequelize } from 'sequelize';
 import { config } from 'dotenv';
 config();
@@ -11,6 +11,13 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'mysql',
+    pool: {
+      max: 5,          // จำกัดการเชื่อมต่อสูงสุด
+      min: 0,          // การเชื่อมต่อขั้นต่ำ
+      acquire: 30000,  // เวลารอการเชื่อมต่อ (ms)
+      idle: 10000      // เวลา idle ก่อนปิด connection (ms)
+    },
+    logging: false     // ปิด log เพื่อลด overhead
   }
 );
 

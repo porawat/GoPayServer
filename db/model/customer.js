@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+
 export default (sequelize) => {
   const Customer = sequelize.define('customer', {
     id: {
@@ -23,10 +24,19 @@ export default (sequelize) => {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
     address: {
       type: DataTypes.TEXT,
       allowNull: true,
       comment: 'Shop address',
+    },
+    status: {
+      type: DataTypes.ENUM('PENDING', 'APPROVED', 'REJECTED'),
+      allowNull: false,
+      defaultValue: 'PENDING',
     },
     is_active: {
       type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),

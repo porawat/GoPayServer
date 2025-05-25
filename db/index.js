@@ -1,3 +1,4 @@
+//db/index.js
 import { Sequelize } from 'sequelize';
 import shopModel from './model/shop.js';
 import employeeModel from './model/employee.js';
@@ -21,10 +22,31 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'mysql',
+    // เพิ่ม connection pool configuration
+    pool: {
+      max: 5,          // จำกัดการเชื่อมต่อสูงสุดที่ 5
+      min: 0,          // การเชื่อมต่อขั้นต่ำ
+      acquire: 30000,  // เวลารอการเชื่อมต่อ (30 วินาที)
+      idle: 10000,     // เวลา idle ก่อนปิด connection (10 วินาที)
+      evict: 5000      // ตรวจสอบ idle connections ทุก 5 วินาที
+    },
     define: {
       timestamps: false,
     },
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    // เพิ่ม retry configuration
+    retry: {
+      match: [
+        /ConnectionError/,
+        /SequelizeConnectionError/,
+        /SequelizeConnectionRefusedError/,
+        /SequelizeHostNotFoundError/,
+        /SequelizeHostNotReachableError/,
+        /SequelizeInvalidConnectionError/,
+        /SequelizeConnectionTimedOutError/
+      ],
+      max: 3
+    }
   }
 );
 
@@ -69,6 +91,36 @@ db.testConnection = async () => {
   }
 };
 
+// เพิ่ม graceful shutdown handlers
+const gracefulShutdown = async (signal) => {
+  console.log(`\nReceived ${signal}. Closing database connections...`);
+  try {
+    await sequelize.close();
+    console.log('Database connections closed successfully.');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error closing database connections:', error);
+    process.exit(1);
+  }
+};
+
+// Handle different termination signals
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));   // Ctrl+C
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM')); // Termination signal
+process.on('SIGQUIT', () => gracefulShutdown('SIGQUIT')); // Quit signal
+
+// Handle uncaught exceptions
+process.on('uncaughtException', async (error) => {
+  console.error('Uncaught Exception:', error);
+  await gracefulShutdown('uncaughtException');
+});
+
+process.on('unhandledRejection', async (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  await gracefulShutdown('unhandledRejection');
+});
+
+// Initialize database connection
 db.testConnection().catch((error) => {
   console.error('Failed to initialize database connection:', error);
   process.exit(1);
