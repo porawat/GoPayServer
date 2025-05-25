@@ -33,6 +33,11 @@ export default (sequelize) => {
       allowNull: true,
       comment: 'Shop address',
     },
+    status: {
+      type: DataTypes.ENUM('PENDING', 'APPROVED', 'REJECTED'),
+      allowNull: false,
+      defaultValue: 'PENDING',
+    },
     is_active: {
       type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
       allowNull: false,
