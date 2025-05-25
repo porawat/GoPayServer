@@ -1,11 +1,10 @@
-//model/shop.js
 import { DataTypes } from 'sequelize';
 
-export default (sequelize, Sequelize) => {
+export default (sequelize) => {
   const Shop = sequelize.define('shop', {
     id: {
       type: DataTypes.CHAR(36),
-      defaultValue: Sequelize.UUIDV4,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
     slug_id: {
@@ -13,7 +12,7 @@ export default (sequelize, Sequelize) => {
       allowNull: false,
     },
     owner_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.CHAR(36), // เปลี่ยนเป็น CHAR(36) เพื่อให้ตรงกับ UUID
       allowNull: false,
     },
     shop_name: {
@@ -48,7 +47,7 @@ export default (sequelize, Sequelize) => {
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      defaultValue: DataTypes.NOW,
     },
     updated_at: {
       type: DataTypes.DATE,
