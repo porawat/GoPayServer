@@ -45,9 +45,9 @@ router.put('/:id', verifyToken, updateCustomer);
 router.delete('/:id', verifyToken, deleteCustomer);
 
 // อนุมัติลูกค้า (ต้องล็อกอินและเป็นเจ้าของร้าน)
-router.post('/approve/:id', verifyToken, restrictToShopOwner, approveCustomer);
+router.post('/approve/:id', verifyToken, approveCustomer);
 
 // ปฏิเสธลูกค้า (ต้องล็อกอินและเป็นเจ้าของร้าน)
-router.post('/reject/:id', verifyToken, restrictToShopOwner, rejectCustomer);
+router.post('/reject/:id', verifyToken, rejectCustomer);
 
 export default router;
