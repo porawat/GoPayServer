@@ -1,10 +1,10 @@
 
 import crypto from 'crypto';
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import QRCode from 'qrcode';
 import db from '../db/index.js';
+import { fileURLToPath } from 'url';
+import fs from 'fs/promises';
+import path from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -259,12 +259,14 @@ const updateShop = async (req, res) => {
       cover: cover_image,
       updated_at: new Date(),
     },
-    { where :{
-        id:shopId
-      }}
-     
-    
-  );
+      {
+        where: {
+          id: shopId
+        }
+      }
+
+
+    );
 
     await shop_config.update({
       address: address !== undefined ? address : shopConfigData.address,
@@ -279,9 +281,12 @@ const updateShop = async (req, res) => {
       currency: currency || shopConfigData.currency,
       theme: theme || shopConfigData.theme,
       updated_at: new Date(),
-    },   { where :{
-        shop_id:shopId}}
-      );
+    }, {
+      where: {
+        shop_id: shopId
+      }
+    }
+    );
 
     return res.status(200).json({
       code: 1000,
@@ -340,4 +345,4 @@ const createCustomer = async (req, res) => {
   }
 };
 
-export { getmyshop, createshop, getShopById, updateShop, createCustomer };
+export { getmyshop, createshop, getShopById, updateShop, createCustomer, uploadImage };

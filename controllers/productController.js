@@ -1,5 +1,9 @@
 import db from '../db/index.js';
+import uploadImage from '../provider/upload.js';
 const { product, } = db;
+
+
+
 
 const getmyproduct = async (req, res) => {
     const userId = req.user?.id;
@@ -73,18 +77,32 @@ const createProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-    const { product_id, product_name, price, description, shop_id, stock, is_active } = req.body;
+    const { product_id, product_name, price, description, shop_id, stock, is_active, product_uid } = req.body;
     const userId = req.user?.id;
+    const image = req.files?.productImage || null;
+    let productImage = null;
 
     if (!userId) {
         return res.status(401).json({ code: 401, message: 'ต้องล็อกอินเพื่ออัปเดตสินค้า' });
     }
-
     try {
-        const updatedProduct = await product.update(
-            { product_name, price, description, stock, updated_at: new Date(), is_active },
-            { where: { product_id, shop_id } }
-        );
+        const updateData = {
+            product_name,
+            price,
+            description,
+            stock,
+            is_active,
+            updated_at: new Date(),
+        };
+        // ✅ ถ้ามีการอัปโหลดรูป ค่อยเพิ่ม image_url เข้าไป
+        if (image) {
+            productImage = await uploadImage(image, `product_image/${shop_id}-${product_id}`);
+            updateData.image_url = productImage;
+        }
+
+        const updatedProduct = await product.update(updateData, {
+            where: { product_uid },
+        });
 
         if (updatedProduct[0] === 0) {
             return res.status(404).json({
@@ -92,7 +110,6 @@ const updateProduct = async (req, res) => {
                 message: 'ไม่พบสินค้าที่ต้องการอัปเดต',
             });
         }
-
         return res.status(200).json({
             code: 1000,
             message: 'อัปเดตสินค้าสำเร็จ',
@@ -105,6 +122,7 @@ const updateProduct = async (req, res) => {
         });
     }
 };
+
 const deleteProduct = async (req, res) => {
     const { product_id, shop_id } = req.body;
     const userId = req.user?.id;
@@ -140,22 +158,39 @@ const deleteProduct = async (req, res) => {
 };
 const productDetail = async (req, res) => {
     const { product_id, shop_id } = req.body;
+
     try {
         const products = await product.findOne({
-            where: { shop_id: shop_id, product_id: product_id },
-
+            where: { shop_id, product_id },
         });
+
+        if (!products) {
+            return res.status(404).json({
+                code: 404,
+                message: 'ไม่พบสินค้า',
+            });
+        }
+
+        // ✅ สร้าง image_url แบบเต็ม
+        const imageUrl = products.image_url
+            ? `${req.protocol}://${req.get('host')}/uploads/${products.image_url}`
+            : null;
+
         return res.status(200).json({
             code: 1000,
-            datarow: products || [],
+            datarow: {
+                ...products.toJSON(),
+                image_url: imageUrl, // แทนที่ image_url เดิม
+            },
         });
     } catch (error) {
-        console.error('ข้อผิดพลาดในการดึงข้อมูลร้านค้า:', error);
+        console.error('ข้อผิดพลาดในการดึงข้อมูลสินค้า:', error);
         return res.status(500).json({
             code: 5000,
             message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
         });
     }
 };
+
 
 export { getmyproduct, createProduct, updateProduct, deleteProduct, productDetail };
