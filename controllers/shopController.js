@@ -345,4 +345,4 @@ const createCustomer = async (req, res) => {
   }
 };
 
-export { getmyshop, createshop, getShopById, updateShop, createCustomer };
+export { getmyshop, createshop, getShopById, updateShop, createCustomer, uploadImage };
