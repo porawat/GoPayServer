@@ -1,6 +1,6 @@
 // backend/routes/shop.js
 import express from 'express';
-import { createProductMaster, getProductMasterList } from '../controllers/productmasterController.js';
+import { createProductMaster, getProductMasterList, } from '../controllers/productmasterController.js';
 import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();

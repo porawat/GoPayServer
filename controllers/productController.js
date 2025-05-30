@@ -1,5 +1,31 @@
 import db from '../db/index.js';
+//import uploadImage from '../provider/upload.js';
+
+import { fileURLToPath } from 'url';
+import fs from 'fs/promises';
+import path from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const { product, } = db;
+
+
+const uploadImage = async (file, filename) => {
+    try {
+        if (!file || !file.name) {
+            throw new Error('No valid file provided');
+        }
+        const uploadDir = path.resolve(__dirname, '../Uploads');
+        await fs.mkdir(uploadDir, { recursive: true });
+        const ext = path.extname(file.name) || '.jpg';
+        const uniqueFilename = `${filename}_${Date.now()}${ext}`;
+        const uploadPath = path.join(uploadDir, uniqueFilename);
+        await file.mv(uploadPath);
+        return uniqueFilename;
+    } catch (error) {
+        console.error('Upload error:', error);
+        throw error;
+    }
+};
 
 const getmyproduct = async (req, res) => {
     const userId = req.user?.id;
@@ -73,16 +99,22 @@ const createProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
+    console.log(req.body);
     const { product_id, product_name, price, description, shop_id, stock, is_active } = req.body;
     const userId = req.user?.id;
+    const image = req.files?.image || null;
+    let productImage = null;
 
+    if (image) {
+        productImage = await uploadImage(image, `${product_id}_${shop_id}_product`);
+    }
     if (!userId) {
         return res.status(401).json({ code: 401, message: 'ต้องล็อกอินเพื่ออัปเดตสินค้า' });
     }
-
+    console.log(productImage)
     try {
         const updatedProduct = await product.update(
-            { product_name, price, description, stock, updated_at: new Date(), is_active },
+            { product_name, price, description, stock, updated_at: new Date(), is_active, image: productImage },
             { where: { product_id, shop_id } }
         );
 
