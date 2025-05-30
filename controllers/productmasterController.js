@@ -62,4 +62,6 @@ const getProductMasterList = async (req, res) => {
 
 };
 
-export { createProductMaster, getProductMasterList };
+
+
+export { createProductMaster, getProductMasterList, };

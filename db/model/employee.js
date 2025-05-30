@@ -12,9 +12,9 @@ export default (sequelize) => {
       shop_id: {
         type: DataTypes.CHAR(36),
         allowNull: false,
-        references: { 
-          model: 'shops', // ตรวจสอบให้แน่ใจว่าตรงกับชื่อตารางจริง
-          key: 'id' 
+        references: {
+          model: 'shop', // ตรวจสอบให้แน่ใจว่าตรงกับชื่อตารางจริง
+          key: 'id'
         },
       },
       first_name: {
@@ -111,11 +111,11 @@ export default (sequelize) => {
   );
 
   // เพิ่ม instance methods
-  Employee.prototype.getFullName = function() {
+  Employee.prototype.getFullName = function () {
     return `${this.first_name} ${this.last_name}`;
   };
 
-  Employee.prototype.isActive = function() {
+  Employee.prototype.isActive = function () {
     return this.status === 'ACTIVE';
   };
 
