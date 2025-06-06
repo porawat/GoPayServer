@@ -13,7 +13,7 @@ const uploadImage = async (file, filename) => {
         const uploadDir = path.resolve(__dirname, '../Uploads');
         await fs.mkdir(uploadDir, { recursive: true });
         const ext = path.extname(file.name) || '.jpg';
-        const uniqueFilename = `${filename}_${Date.now()}${ext}`;
+        const uniqueFilename = `${filename}${ext}`;
         const uploadPath = path.join(uploadDir, uniqueFilename);
         await file.mv(uploadPath);
         return uniqueFilename;

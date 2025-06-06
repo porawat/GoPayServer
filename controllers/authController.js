@@ -124,11 +124,12 @@ const getDashboard = async (req, res) => {
   }
 };
 
-const getSettings = (req, res) => {
+const getSettings = async (req, res) => {
+  // console.log('req.user:', req.user)
   if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'ปฏิเสธการเข้าถึง: เฉพาะผู้ดูแลระบบเท่านั้น' });
+    return res.status(403).json({ code: 5000, message: 'ปฏิเสธการเข้าถึง: เฉพาะผู้ดูแลระบบเท่านั้น' });
   }
-  res.json({ message: `ยินดีต้อนรับ ${req.user.username} สู่การตั้งค่า`, role: req.user.role });
+  res.status(200).json({ code: 1000, message: `ยินดีต้อนรับ ${req.user.username} สู่การตั้งค่า`, role: req.user.role });
 };
 
 const getmembers = (req, res) => {
