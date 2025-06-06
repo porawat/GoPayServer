@@ -1,6 +1,8 @@
+// customerRouter.js
 import express from 'express';
 import {
     createCustomer,
+    loginCustomer,
     getCustomer,
     getAllcustomer,
     updateCustomer,
@@ -8,46 +10,49 @@ import {
     approveCustomer,
     rejectCustomer,
     getPendingCustomers,
+    changeCustomerPassword,
 } from '../controllers/customerController.js';
 import { verifyToken } from '../middleware/auth.js';
+import db from '../db/index.js'; // เพิ่ม import db
 
 const router = express.Router();
 
-// Middleware เพื่อตรวจสอบว่าเป็นเจ้าของร้าน
-const restrictToShopOwner = (req, res, next) => {
+// Middleware เพื่อตรวจสอบว่าเป็นเจ้าของร้านหรือ admin
+const restrictToShopOwner = async (req, res, next) => {
     console.log("params ", req.params);
     console.log("user ", req.user);
-    if (!req.user || !req.user.shopId || req.user.shopId !== req.params.shop_id) {
-        return res.status(403).json({
-            code: 4030,
-            message: 'คุณไม่มีสิทธิ์เข้าถึงร้านค้านี้',
+    try {
+        if (req.user.role === 'admin') {
+            return next(); // Admin เข้าถึงได้ทุก shop_id
+        }
+        const shop = await db.shop.findOne({ where: { id: req.params.shop_id } });
+        if (!shop || !req.user || shop.user_id !== req.user.id) {
+            return res.status(403).json({
+                code: 4030,
+                message: 'คุณไม่มีสิทธิ์เข้าถึงร้านค้านี้',
+            });
+        }
+        req.user.shopId = shop.id; // ตั้ง shopId ใน req.user
+        next();
+    } catch (error) {
+        console.error('Error in restrictToShopOwner:', error);
+        return res.status(500).json({
+            code: 5000,
+            message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
         });
     }
-    next();
 };
 
-// สร้างลูกค้า (ไม่ต้องตรวจสอบ token)
+// Routes คงเดิม
 router.post('/', createCustomer);
-
-// ดึงข้อมูลลูกค้าโดย ID (ไม่ต้องตรวจสอบ token เพื่อรองรับ PendingApproval)
+router.post('/login', loginCustomer);
 router.get('/:id', getCustomer);
-
-// ดึงลูกค้าทั้งหมดของร้าน (ต้องล็อกอินและเป็นเจ้าของร้าน)
-router.get('/all/:shop_id', verifyToken, getAllcustomer);
-
-// ดึงลูกค้าที่รอการอนุมัติ (ต้องล็อกอินและเป็นเจ้าของร้าน)
-router.get('/pending/:shop_id', verifyToken, getPendingCustomers);
-
-// อัปเดตข้อมูลลูกค้า (ต้องล็อกอิน)
+router.get('/all/:shop_id', verifyToken, restrictToShopOwner, getAllcustomer);
+router.get('/pending/:shop_id', verifyToken, restrictToShopOwner, getPendingCustomers);
 router.put('/:id', verifyToken, updateCustomer);
-
-// ลบลูกค้า (ต้องล็อกอิน)
+router.put('/:id/change-password', verifyToken, changeCustomerPassword);
 router.delete('/:id', verifyToken, deleteCustomer);
-
-// อนุมัติลูกค้า (ต้องล็อกอินและเป็นเจ้าของร้าน)
-router.post('/approve/:id', verifyToken, approveCustomer);
-
-// ปฏิเสธลูกค้า (ต้องล็อกอินและเป็นเจ้าของร้าน)
-router.post('/reject/:id', verifyToken, rejectCustomer);
+router.post('/approve/:id', verifyToken, restrictToShopOwner, approveCustomer);
+router.post('/reject/:id', verifyToken, restrictToShopOwner, rejectCustomer);
 
 export default router;
