@@ -491,10 +491,10 @@ const deleteCustomer = async (req, res) => {
 };
 
 const approveCustomer = async (req, res) => {
-    const { id } = req.params;
+    const { id, shop_id } = req.body;
     try {
-        const customerData = await customer.findOne({
-            where: { id, status: 'PENDING', is_active: 'ACTIVE' },
+        const customerData = await customer_shops.findOne({
+            where: { customer_id: id, shop_id, status: 'PENDING', is_active: 'ACTIVE' },
         });
         if (!customerData) {
             return res.status(404).json({
@@ -502,9 +502,9 @@ const approveCustomer = async (req, res) => {
                 message: 'ไม่พบข้อมูลลูกค้าที่รอการอนุมัติ',
             });
         }
-        await customer.update(
+        await customer_shops.update(
             { status: 'APPROVED', updated_at: new Date() },
-            { where: { id } }
+            { where: { customer_id: id, shop_id } }
         );
         return res.status(200).json({
             code: 1000,
