@@ -61,6 +61,11 @@ export default (sequelize) => {
     tableName: 'shop',
     timestamps: false,
   });
-
+  Shop.associate = (models) => {
+    Shop.belongsToMany(models.customer, {
+      through: 'customer_shops',
+      foreignKey: 'shop_id'
+    });
+  };
   return Shop;
 };
