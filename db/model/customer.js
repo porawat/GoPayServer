@@ -7,11 +7,7 @@ export default (sequelize) => {
       primaryKey: true,
       allowNull: false,
     },
-    shop_id: {
-      type: DataTypes.CHAR(36),
-      allowNull: false,
-      references: { model: 'shop', key: 'id' },
-    },
+
     name: {
       type: DataTypes.STRING(255),
       allowNull: false,
@@ -31,18 +27,9 @@ export default (sequelize) => {
     address: {
       type: DataTypes.TEXT,
       allowNull: true,
-      comment: 'Shop address',
+
     },
-    status: {
-      type: DataTypes.ENUM('PENDING', 'APPROVED', 'REJECTED'),
-      allowNull: false,
-      defaultValue: 'PENDING',
-    },
-    is_active: {
-      type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
-      allowNull: false,
-      defaultValue: 'ACTIVE',
-    },
+
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -60,6 +47,11 @@ export default (sequelize) => {
     tableName: 'customer',
     timestamps: false,
   });
-
+  Customer.associate = (models) => {
+    Customer.belongsToMany(models.shop, {
+      through: 'customer_shops',
+      foreignKey: 'customer_id'
+    });
+  };
   return Customer;
 };

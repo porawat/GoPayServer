@@ -47,5 +47,5 @@ export default (sequelize, Sequelize) => {
     }
   );
 
- return User;
+  return User;
 };

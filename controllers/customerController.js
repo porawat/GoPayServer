@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-const { customer, shop } = db;
+const { customer, shop, customer_shops } = db;
 
 const createCustomer = async (req, res) => {
     try {
@@ -47,7 +47,7 @@ const createCustomer = async (req, res) => {
 
         // ตรวจสอบว่า phone ไม่ซ้ำ
         const existingCustomer = await customer.findOne({
-            where: { phone, is_active: 'ACTIVE' },
+            where: { phone },
         }).catch((err) => {
             console.error('ข้อผิดพลาดในการตรวจสอบเบอร์โทร:', err);
             throw new Error('Database query error: phone check');
@@ -89,37 +89,46 @@ const createCustomer = async (req, res) => {
 
         // บันทึกข้อมูลลูกค้า
         const newCustomer = await customer.create({
-                id,
-                name,
-                email: email || null,
-                phone,
-                password: hashedPassword,
-                address: address || null,
-                shop_id,
+            id,
+            name,
+            email: email || null,
+            phone,
+            password: hashedPassword,
+            address: address || null,
+            created_at: new Date(),
+            updated_at: new Date(),
+
+        }).catch((dbError) => {
+            console.error('ข้อผิดพลาดในการบันทึกข้อมูลลูกค้า:', {
+                message: dbError.message,
+                stack: dbError.stack,
+                name: dbError.name,
+            });
+            if (dbError.name === 'SequelizeForeignKeyConstraintError') {
+                return res.status(400).json({
+                    code: 4006,
+                    message: 'รหัสร้านค้าไม่ถูกต้องหรือไม่สามารถเชื่อมโยงได้',
+                });
+            }
+            if (dbError.name === 'SequelizeDatabaseError') {
+                return res.status(500).json({
+                    code: 5002,
+                    message: 'ข้อผิดพลาดในฐานข้อมูล: โครงสร้างตารางไม่สอดคล้อง',
+                });
+            }
+            throw dbError;
+        });
+        console.log('newCustomer', newCustomer);
+        if (newCustomer) {
+            await customer_shops.create({
+                customer_id: newCustomer.id,
+                shop_id: shop_id,
                 status: 'PENDING',
                 is_active: 'ACTIVE',
                 created_at: new Date(),
-            }).catch((dbError) => {
-                console.error('ข้อผิดพลาดในการบันทึกข้อมูลลูกค้า:', {
-                    message: dbError.message,
-                    stack: dbError.stack,
-                    name: dbError.name,
-                });
-                if (dbError.name === 'SequelizeForeignKeyConstraintError') {
-                    return res.status(400).json({
-                        code: 4006,
-                        message: 'รหัสร้านค้าไม่ถูกต้องหรือไม่สามารถเชื่อมโยงได้',
-                    });
-                }
-                if (dbError.name === 'SequelizeDatabaseError') {
-                    return res.status(500).json({
-                        code: 5002,
-                        message: 'ข้อผิดพลาดในฐานข้อมูล: โครงสร้างตารางไม่สอดคล้อง',
-                    });
-                }
-                throw dbError;
-            });
-
+                updated_at: new Date(),
+            })
+        }
         return res.status(201).json({
             code: 1000,
             message: 'ลงทะเบียนลูกค้าสำเร็จ รอการอนุมัติจากเจ้าของร้าน',
@@ -236,7 +245,7 @@ const getCustomer = async (req, res) => {
     const id = req.params.id;
 
     try {
-        const customerData = await customer.findOne({
+        const customerData = await customer_shops.find({
             where: { id, is_active: 'ACTIVE' },
         });
 
@@ -274,6 +283,7 @@ const getCustomer = async (req, res) => {
 
 // customerController.js
 const getAllcustomer = async (req, res) => {
+    console.log(req.params);
     const shop_id = req.params.shop_id;
     const user_id = req.user.id;
     const page = parseInt(req.query.page) || 1;
@@ -292,11 +302,19 @@ const getAllcustomer = async (req, res) => {
             }
         }
 
-        const customers = await customer.findAndCountAll({
+        const customers = await customer_shops.findAndCountAll({
             where: {
                 shop_id,
                 is_active: 'ACTIVE',
             },
+            include: [{
+                model: db.customer,
+                as: 'customer',
+                required: true,
+                attributes: ['id', 'name', 'email', 'phone', 'created_at']
+            }],
+            attributes: ['status', 'created_at'],
+            order: [['created_at', 'DESC']],
             limit,
             offset: (page - 1) * limit,
         });
@@ -304,17 +322,13 @@ const getAllcustomer = async (req, res) => {
         return res.status(200).json({
             code: 1000,
             message: 'ดึงข้อมูลลูกค้าสำเร็จ',
-            data: customers.rows.map((c) => ({
-                id: c.id,
-                name: c.name,
-                email: c.email,
-                phone: c.phone,
-                address: c.address,
-                shop_id: c.shop_id,
-                status: c.status,
-                is_active: c.is_active,
-                created_at: c.created_at,
-                updated_at: c.updated_at,
+            data: customers.rows.map((customerShop) => ({
+                id: customerShop.customer.id,
+                name: customerShop.customer.name,
+                email: customerShop.customer.email,
+                phone: customerShop.customer.phone,
+                status: customerShop.status,
+                created_at: customerShop.customer.created_at,
             })),
             pagination: {
                 totalPages: Math.ceil(customers.count / limit),
