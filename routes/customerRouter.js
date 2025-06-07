@@ -52,7 +52,7 @@ router.get('/pending/:shop_id', verifyToken, restrictToShopOwner, getPendingCust
 router.put('/:id', verifyToken, updateCustomer);
 router.put('/:id/change-password', verifyToken, changeCustomerPassword);
 router.delete('/:id', verifyToken, deleteCustomer);
-router.post('/approve/:id', verifyToken, restrictToShopOwner, approveCustomer);
+router.post('/approve', verifyToken, restrictToShopOwner, approveCustomer);
 router.post('/reject/:id', verifyToken, restrictToShopOwner, rejectCustomer);
 
 export default router;
