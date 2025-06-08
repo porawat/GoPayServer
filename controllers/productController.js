@@ -30,48 +30,87 @@ const getmyproduct = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-    const { product_name, product_id, price, description, shop_id } = req.body;
+    const { products } = req.body;
+    console.log('products', products);
     const userId = req.user?.id;
 
     if (!userId) {
-        return res.status(401).json({ code: 401, message: 'ต้องล็อกอินเพื่อเพิ่มสินค้า' });
+        return res.status(401).json({
+            code: 401,
+            message: 'ต้องล็อกอินเพื่อเพิ่มสินค้า'
+        });
     }
 
     try {
-        // Check for existing product with same product_id and shop_id
-        const existingProduct = await product.findOne({
-            where: {
-                product_id: product_id,
-                shop_id: shop_id
-            }
-        });
-
-        if (existingProduct) {
-            return res.status(409).json({
-                code: 5000,
-                message: 'สินค้านี้มีอยู่ในร้านนี้แล้ว',
-                data: existingProduct
+        if (!Array.isArray(products) || products.length === 0) {
+            return res.status(400).json({
+                code: 4000,
+                message: 'กรุณาส่งข้อมูลสินค้าในรูปแบบ array'
             });
         }
 
-        const newProduct = await product.create({
-            product_id: product_id,
-            shop_id: shop_id,
-            product_name: product_name,
-            price: price,
-            description: description,
+        const shopId = products[0]?.shop_id;
+
+        if (!shopId) {
+            return res.status(400).json({
+                code: 4001,
+                message: 'shop_id ไม่ถูกต้องหรือหายไป'
+            });
+        }
+
+        const existingProducts = await product.findAll({
+            where: {
+                product_id: products.map(p => p.product_id),
+                shop_id: shopId,
+                deleted_at: null
+            }
         });
+
+        const existingProductIds = existingProducts.map(p => p.product_id);
+
+        const newProducts = products.filter(p => !existingProductIds.includes(p.product_id));
+
+        if (newProducts.length === 0) {
+            return res.status(409).json({
+                code: 4090,
+                message: 'สินค้าทั้งหมดมีอยู่ในร้านแล้ว',
+                existingProducts: existingProductIds
+            });
+        }
+
+        const now = new Date();
+        const productsToCreate = newProducts.map(p => ({
+            product_id: p.product_id,
+            product_name: p.product_name,
+            shop_id: p.shop_id,
+            description: p.description || null,
+            price: p.price,
+            is_active: p.is_active || 'ACTIVE',
+            stock: p.stock || 0,
+            image_url: p.image_url || null,
+            created_at: now,
+            updated_at: now
+        }));
+        console.log('createdProducts', productsToCreate);
+        const createdProducts = await product.bulkCreate(productsToCreate);
+
 
         return res.status(201).json({
             code: 1000,
             message: 'เพิ่มสินค้าสำเร็จ',
-            data: newProduct,
+            data: {
+                created: createdProducts.length,
+                skipped: existingProducts.length,
+                products: createdProducts,
+                existingProductIds
+            }
         });
+
     } catch (error) {
         console.error('ข้อผิดพลาดในการเพิ่มสินค้า:', error);
         return res.status(500).json({
             code: 5000,
-            message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
+            message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์'
         });
     }
 };
