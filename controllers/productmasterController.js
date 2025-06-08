@@ -54,7 +54,7 @@ const getProductMasterList = async (req, res) => {
     catch (error) {
         console.error('ข้อผิดพลาดในการดึงข้อมูลหมวดหมู่:', error);
         return res.status(500).json({
-            code: 500,
+            code: 5000,
             message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
         });
     }
@@ -62,6 +62,39 @@ const getProductMasterList = async (req, res) => {
 
 };
 
+const getProductMasterbyId = async (req, res) => {
+    const category_id = req.params.category_id;
+    console.log('getProductMasterbyId', category_id)
+
+    let whatsearch;
+    if (category_id === "all") {
+        whatsearch = {
+            status: 'ACTIVE',
+        }
+    } else {
+        whatsearch = {
+            category_id: category_id,
+            status: 'ACTIVE',
+        }
+    }
+
+    try {
+        const productList = await productmaster.findAll({
+            where: whatsearch
+        });
+        return res.status(200).json({
+            code: 1000,
+            message: 'ดึงข้อมูลหมวดหมู่สำเร็จ',
+            data: productList || [],
+        });
+    } catch (error) {
+        console.error('ข้อผิดพลาดในการดึงข้อมูลหมวดหมู่:', error);
+        return res.status(500).json({
+            code: 5000,
+            message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
+        });
+    }
+}
 
 
-export { createProductMaster, getProductMasterList, };
+export { createProductMaster, getProductMasterList, getProductMasterbyId };
