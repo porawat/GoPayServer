@@ -31,7 +31,7 @@ async function syncDatabase() {
     console.error('Error synchronizing database:', error);
   }
 }
-//syncDatabase();
+syncDatabase();
 
 const app = express();
 app.use('/uploads', express.static('Uploads'));
