@@ -1,43 +1,35 @@
+// db/model/customer.js
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
-  const Employee = sequelize.define(
-    'Employee',
+  const Customer = sequelize.define(
+    'Customer',
     {
       id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      shop_id: {
         type: DataTypes.CHAR(36),
+        primaryKey: true,
         allowNull: false,
       },
-      first_name: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-      },
-      last_name: {
-        type: DataTypes.STRING(100),
+      name: {
+        type: DataTypes.STRING(255),
         allowNull: false,
       },
       email: {
-        type: DataTypes.STRING(200),
-        allowNull: false,
+        type: DataTypes.STRING(255),
+        allowNull: true,
         unique: true,
+      },
+      phone: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
       },
       password: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      phone: {
-        type: DataTypes.STRING(20),
+      address: {
+        type: DataTypes.TEXT,
         allowNull: true,
-      },
-      status: {
-        type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED'),
-        allowNull: false,
-        defaultValue: 'ACTIVE',
       },
       created_at: {
         type: DataTypes.DATE,
@@ -46,6 +38,7 @@ export default (sequelize) => {
       },
       updated_at: {
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
       },
       deleted_at: {
@@ -54,7 +47,7 @@ export default (sequelize) => {
       },
     },
     {
-      tableName: 'employees',
+      tableName: 'customer',
       timestamps: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
@@ -65,10 +58,22 @@ export default (sequelize) => {
     }
   );
 
-  Employee.associate = (models) => {
-    Employee.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
-    Employee.hasMany(models.EmployeeRole, { foreignKey: 'employee_id', as: 'roles' });
+  Customer.associate = (models) => {
+    Customer.hasMany(models.CustomerShops, {
+      foreignKey: 'customer_id',
+      as: 'customer_shops',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE',
+    });
+    Customer.belongsToMany(models.Shop, {
+      through: models.CustomerShops,
+      foreignKey: 'customer_id',
+      otherKey: 'shop_id',
+      as: 'shops',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE',
+    });
   };
 
-  return Employee;
+  return Customer;
 };
