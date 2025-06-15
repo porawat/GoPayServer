@@ -146,15 +146,15 @@ db.Product.hasMany(db.WarehouseProduct, { foreignKey: 'product_id', as: 'warehou
 
 // Supplier และ Product, ProductMaster
 db.Supplier.hasMany(db.Product, { foreignKey: 'supplier_id', as: 'products', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
-db.Supplier.hasMany(db.ProductMaster, { foreignKey: 'supplier_id', as: 'product_masters', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
+db.Supplier.hasMany(db.ProductMaster, { foreignKey: 'supplier_id', as: 'productMasters', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
 
 // Category และ Product
 db.Category.hasMany(db.Product, { foreignKey: 'category_id', as: 'products', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
-db.Category.hasMany(db.ProductMaster, { foreignKey: 'category_id', as: 'product_masters', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
+db.Category.hasMany(db.ProductMaster, { foreignKey: 'category_id', as: 'productMasters', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
 
 // Product และ ProductMaster
 db.ProductMaster.hasMany(db.Product, { foreignKey: 'product_id', targetKey: 'product_id', as: 'products', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
-db.Product.belongsTo(db.ProductMaster, { foreignKey: 'product_id', targetKey: 'product_id', as: 'product_master', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
+db.Product.belongsTo(db.ProductMaster, { foreignKey: 'product_id', targetKey: 'product_id', as: 'productMasters', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
 
 db.testConnection = async () => {
   try {

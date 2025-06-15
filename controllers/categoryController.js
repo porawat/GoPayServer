@@ -1,9 +1,9 @@
 import db from '../db/index.js';
-const { category } = db;
+const { Category } = db;
 
 const getcategoryList = async (req, res) => {
     try {
-        const categoryList = await category.findAll({
+        const categoryList = await Category.findAll({
             where: {
                 active: 'ACTIVE',
             },

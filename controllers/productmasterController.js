@@ -1,5 +1,5 @@
 import db from '../db/index.js';
-const { productmaster } = db;
+const { ProductMaster } = db;
 
 const createProductMaster = async (req, res) => {
     const { sku, name, description, category_id, supplier_id,
@@ -11,7 +11,7 @@ const createProductMaster = async (req, res) => {
     }
 
     try {
-        const newProductMaster = await productmaster.create({
+        const newProductMaster = await ProductMaster.create({
             sku: sku,
             name: name,
             description: description,
@@ -40,7 +40,8 @@ const getProductMasterList = async (req, res) => {
 
     console.log('getProductMasterList');
     try {
-        const productList = await productmaster.findAll({
+
+        const productList = await db.ProductMaster.findAll({
             where: {
                 status: 'ACTIVE',
             },
@@ -64,7 +65,6 @@ const getProductMasterList = async (req, res) => {
 
 const getProductMasterbyId = async (req, res) => {
     const category_id = req.params.category_id;
-    console.log('getProductMasterbyId', category_id)
 
     let whatsearch;
     if (category_id === "all") {
@@ -77,10 +77,11 @@ const getProductMasterbyId = async (req, res) => {
             status: 'ACTIVE',
         }
     }
-
     try {
-        const productList = await productmaster.findAll({
+        const productList = await db.ProductMaster.findAll({
             where: whatsearch
+        }, {
+            include: [{ model: db.Category, as: 'category' }]
         });
         return res.status(200).json({
             code: 1000,

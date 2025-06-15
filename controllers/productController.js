@@ -12,9 +12,9 @@ const getmyproduct = async (req, res) => {
     const products = await Product.findAll({
       where: { shop_id: shopId, deleted_at: null },
       include: [
-        { model: Warehouse, attributes: ['warehouse_id', 'name', 'location'] },
-        { model: Category, attributes: ['category_id', 'cat_name'] },
-        { model: Supplier, attributes: ['supplier_id', 'name'] },
+        { model: Warehouse, as: 'warehouse', attributes: ['warehouse_id', 'name', 'location'] },
+        { model: Category, as: 'category', attributes: ['category_id', 'cat_name'] },
+        { model: Supplier, as: 'supplier', attributes: ['supplier_id', 'name'] },
       ],
     });
     return res.status(200).json({
