@@ -1,21 +1,26 @@
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
-  const EmployeeRole = sequelize.define(
-    'EmployeeRole',
+  const CustomerShops = sequelize.define(
+    'CustomerShops',
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      employee_id: {
-        type: DataTypes.INTEGER,
+      customer_id: {
+        type: DataTypes.CHAR(36),
         allowNull: false,
       },
-      role: {
-        type: DataTypes.ENUM('CASHIER', 'INVENTORY', 'ADMIN'),
+      shop_id: {
+        type: DataTypes.CHAR(36),
         allowNull: false,
+      },
+      status: {
+        type: DataTypes.ENUM('PENDING', 'APPROVED', 'REJECTED'),
+        allowNull: false,
+        defaultValue: 'PENDING',
       },
       created_at: {
         type: DataTypes.DATE,
@@ -24,15 +29,21 @@ export default (sequelize) => {
       },
       updated_at: {
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
       },
       deleted_at: {
         type: DataTypes.DATE,
         allowNull: true,
       },
+      is_active: {
+        type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
+        allowNull: false,
+        defaultValue: 'ACTIVE',
+      },
     },
     {
-      tableName: 'employee_roles',
+      tableName: 'customer_shops',
       timestamps: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
@@ -43,9 +54,10 @@ export default (sequelize) => {
     }
   );
 
-  EmployeeRole.associate = (models) => {
-    EmployeeRole.belongsTo(models.Employee, { foreignKey: 'employee_id', as: 'employee' });
+  CustomerShops.associate = (models) => {
+    CustomerShops.belongsTo(models.Customer, { foreignKey: 'customer_id', as: 'customer' });
+    CustomerShops.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
   };
 
-  return EmployeeRole;
+  return CustomerShops;
 };

@@ -1,43 +1,29 @@
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
-  const User = sequelize.define(
-    'User',
+  const Warehouse = sequelize.define(
+    'Warehouse',
     {
-      id: {
+      warehouse_id: {
         type: DataTypes.CHAR(36),
         primaryKey: true,
       },
-      username: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-        unique: true,
-      },
-      password: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-      },
-      role: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-      },
-      email: {
-        type: DataTypes.STRING(200),
-        allowNull: true,
-        unique: true,
-      },
-      full_name: {
+      name: {
         type: DataTypes.STRING(100),
-        allowNull: true,
-      },
-      phone: {
-        type: DataTypes.STRING(20),
-        allowNull: true,
-      },
-      is_active: {
-        type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: true,
+      },
+      location: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      shop_id: {
+        type: DataTypes.CHAR(36),
+        allowNull: false,
+      },
+      status: {
+        type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
+        allowNull: false,
+        defaultValue: 'ACTIVE',
       },
       created_at: {
         type: DataTypes.DATE,
@@ -46,6 +32,7 @@ export default (sequelize) => {
       },
       updated_at: {
         type: DataTypes.DATE,
+        allowNull: true,
         defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
       },
       deleted_at: {
@@ -54,7 +41,7 @@ export default (sequelize) => {
       },
     },
     {
-      tableName: 'user',
+      tableName: 'warehouse',
       timestamps: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
@@ -64,9 +51,12 @@ export default (sequelize) => {
     }
   );
 
-  User.associate = (models) => {
-    User.hasMany(models.Shop, { foreignKey: 'owner_id', as: 'shops', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
+  // Define associations
+  Warehouse.associate = (models) => {
+    Warehouse.belongsTo(models.Shop, { foreignKey: 'shop_id', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
+    Warehouse.hasMany(models.Product, { foreignKey: 'warehouse_id', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
+    Warehouse.hasMany(models.WarehouseProduct, { foreignKey: 'warehouse_id', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
   };
 
-  return User;
+  return Warehouse;
 };
