@@ -28,9 +28,9 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: 'ข้อมูลรับรองไม่ถูกต้อง' });
     }
-
+    // console.log('เข้าสู่ระบบสำเร็จ:', user);
     const token = jwt.sign(
-      { id: user.id, role: user.role, username: user.username },
+      { id: user.id, role: user.role, username: user.username, userId: user.username },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     );
