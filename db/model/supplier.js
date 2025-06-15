@@ -1,19 +1,20 @@
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
-  const Category = sequelize.define(
-    'Category',
+  const Supplier = sequelize.define(
+    'Supplier',
     {
-      category_id: {
+      supplier_id: {
         type: DataTypes.CHAR(36),
         primaryKey: true,
       },
-      cat_name: {
-        type: DataTypes.STRING,
+      name: {
+        type: DataTypes.STRING(100),
         allowNull: false,
       },
-      active: {
+      status: {
         type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
+        allowNull: false,
         defaultValue: 'ACTIVE',
       },
       created_at: {
@@ -23,26 +24,34 @@ export default (sequelize) => {
       },
       updated_at: {
         type: DataTypes.DATE,
+        allowNull: true,
         defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
       },
       deleted_at: {
         type: DataTypes.DATE,
-        defaultValue: null,
+        allowNull: true,
       },
-      cat_prefix: {
-        type: DataTypes.STRING,
+      contact_info: {
+        type: DataTypes.TEXT,
         allowNull: true,
       },
     },
     {
-      tableName: 'category',
+      tableName: 'supplier',
       timestamps: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at',
       collate: 'utf8mb4_unicode_ci',
+      paranoid: true,
     }
   );
 
-  return Category;
+  // Define associations
+  Supplier.associate = (models) => {
+    Supplier.hasMany(models.Product, { foreignKey: 'supplier_id', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
+    Supplier.hasMany(models.ProductMaster, { foreignKey: 'supplier_id', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
+  };
+
+  return Supplier;
 };

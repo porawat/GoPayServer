@@ -1,4 +1,3 @@
-
 import crypto from 'crypto';
 import QRCode from 'qrcode';
 import db from '../db/index.js';
@@ -8,7 +7,7 @@ import path from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const { shop, shop_config, customer } = db;
+const { Shop, ShopConfig, Customer } = db; // เปลี่ยนเป็นตัวพิมพ์ใหญ่
 
 const uploadImage = async (file, filename) => {
   try {
@@ -52,7 +51,7 @@ const getmyshop = async (req, res) => {
     return res.status(401).json({ code: 401, message: 'ต้องล็อกอินเพื่อดึงข้อมูลร้านค้า' });
   }
   try {
-    const shops = await shop.findAll({
+    const shops = await Shop.findAll({
       where: { owner_id: userId, deleted_at: null },
       attributes: ['id', 'shop_name', 'slug_id', 'shop_tel', 'contact_name', 'email', 'avatar', 'cover'],
     });
@@ -91,7 +90,7 @@ const createshop = async (req, res) => {
     if (cover) {
       cover_image = await uploadImage(cover, `${shop_id}_cover`);
     }
-    await shop.create({
+    await Shop.create({
       id: shop_id,
       slug_id: shopSlugId,
       owner_id: userId,
@@ -107,7 +106,7 @@ const createshop = async (req, res) => {
       deleted_at: null,
     });
     const qrCodePath = await generateQRCode(shop_id);
-    await shop_config.create({
+    await ShopConfig.create({
       id: crypto.randomUUID(),
       shop_id,
       address: null,
@@ -141,19 +140,17 @@ const createshop = async (req, res) => {
 };
 
 const getShopById = async (req, res) => {
-
   const { shopId } = req.params;
   console.log('shopId:', shopId);
   try {
-    const shopData = await shop.findOne({
+    const shopData = await Shop.findOne({
       where: {
         id: shopId,
-
         deleted_at: null,
       },
       attributes: ['id', 'shop_name', 'slug_id', 'shop_tel', 'contact_name', 'email', 'avatar', 'cover'],
       include: [{
-        model: shop_config,
+        model: ShopConfig,
         as: 'config',
         attributes: [
           'address', 'latitude', 'longitude', 'open_time', 'close_time', 'is_active',
@@ -203,7 +200,7 @@ const updateShop = async (req, res) => {
   }
 
   try {
-    const shopData = await shop.findOne({
+    const shopData = await Shop.findOne({
       where: {
         id: shopId,
         owner_id: userId,
@@ -215,7 +212,7 @@ const updateShop = async (req, res) => {
       return res.status(404).json({ code: 404, message: 'ไม่พบร้านค้าที่ระบุหรือคุณไม่มีสิทธิ์' });
     }
 
-    const shopConfigData = await shop_config.findOne({
+    const shopConfigData = await ShopConfig.findOne({
       where: { shop_id: shopId, deleted_at: null },
     });
     if (!shopConfigData) {
@@ -249,43 +246,40 @@ const updateShop = async (req, res) => {
       }
     }
 
-    await shop.update({
-      slug_id: shopSlugId || shopData.slug_id,
-      shop_name: shopName || shopData.shop_name,
-      shop_tel: tel !== undefined ? tel : shopData.shop_tel,
-      contact_name: contact_person !== undefined ? contact_person : shopData.contact_name,
-      email: email !== undefined ? email : shopData.email,
-      avatar: avatar_image,
-      cover: cover_image,
-      updated_at: new Date(),
-    },
+    await Shop.update(
       {
-        where: {
-          id: shopId
-        }
+        slug_id: shopSlugId || shopData.slug_id,
+        shop_name: shopName || shopData.shop_name,
+        shop_tel: tel !== undefined ? tel : shopData.shop_tel,
+        contact_name: contact_person !== undefined ? contact_person : shopData.contact_name,
+        email: email !== undefined ? email : shopData.email,
+        avatar: avatar_image,
+        cover: cover_image,
+        updated_at: new Date(),
+      },
+      {
+        where: { id: shopId }
       }
-
-
     );
 
-    await shop_config.update({
-      address: address !== undefined ? address : shopConfigData.address,
-      latitude: latitude !== undefined ? parseFloat(latitude) : shopConfigData.latitude,
-      longitude: longitude !== undefined ? parseFloat(longitude) : shopConfigData.longitude,
-      open_time: open_time !== undefined ? open_time : shopConfigData.open_time,
-      close_time: close_time !== undefined ? close_time : shopConfigData.close_time,
-      is_active: is_active || shopConfigData.is_active,
-      notification_email: notification_email !== undefined ? parseInt(notification_email) : shopConfigData.notification_email,
-      notification_sms: notification_sms !== undefined ? parseInt(notification_sms) : shopConfigData.notification_sms,
-      language: language || shopConfigData.language,
-      currency: currency || shopConfigData.currency,
-      theme: theme || shopConfigData.theme,
-      updated_at: new Date(),
-    }, {
-      where: {
-        shop_id: shopId
+    await ShopConfig.update(
+      {
+        address: address !== undefined ? address : shopConfigData.address,
+        latitude: latitude !== undefined ? parseFloat(latitude) : shopConfigData.latitude,
+        longitude: longitude !== undefined ? parseFloat(longitude) : shopConfigData.longitude,
+        open_time: open_time !== undefined ? open_time : shopConfigData.open_time,
+        close_time: close_time !== undefined ? close_time : shopConfigData.close_time,
+        is_active: is_active || shopConfigData.is_active,
+        notification_email: notification_email !== undefined ? parseInt(notification_email) : shopConfigData.notification_email,
+        notification_sms: notification_sms !== undefined ? parseInt(notification_sms) : shopConfigData.notification_sms,
+        language: language || shopConfigData.language,
+        currency: currency || shopConfigData.currency,
+        theme: theme || shopConfigData.theme,
+        updated_at: new Date(),
+      },
+      {
+        where: { shop_id: shopId }
       }
-    }
     );
 
     return res.status(200).json({
@@ -311,7 +305,7 @@ const createCustomer = async (req, res) => {
     });
   }
   try {
-    const shopData = await shop.findOne({
+    const shopData = await Shop.findOne({
       where: { id: shop_id, deleted_at: null },
     });
     if (!shopData) {
@@ -319,7 +313,7 @@ const createCustomer = async (req, res) => {
     }
     const customer_id = crypto.randomUUID();
     const now = new Date();
-    await customer.create({
+    await Customer.create({
       id: customer_id,
       shop_id,
       name,

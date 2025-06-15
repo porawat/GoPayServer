@@ -4,44 +4,34 @@ export default (sequelize) => {
   const Employee = sequelize.define(
     'Employee',
     {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
+      employee_id: {
+        type: DataTypes.CHAR(36), // เปลี่ยนจาก INTEGER เป็น CHAR(36)
         primaryKey: true,
       },
       shop_id: {
         type: DataTypes.CHAR(36),
         allowNull: false,
-        references: {
-          model: 'shop', // ตรวจสอบให้แน่ใจว่าตรงกับชื่อตารางจริง
-          key: 'id'
-        },
       },
       first_name: {
-        type: DataTypes.STRING(100), // จำกัดความยาว
+        type: DataTypes.STRING(100),
         allowNull: false,
-
       },
       last_name: {
         type: DataTypes.STRING(100),
         allowNull: false,
-
       },
       email: {
         type: DataTypes.STRING(200),
         allowNull: false,
-        unique: 'unique_email_idx', // กำหนดชื่อ index
-
+        unique: true,
       },
       password: {
-        type: DataTypes.STRING(255), // เพิ่มความยาวสำหรับ hashed password
+        type: DataTypes.STRING(255),
         allowNull: false,
-
       },
       phone: {
         type: DataTypes.STRING(20),
         allowNull: true,
-
       },
       status: {
         type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED'),
@@ -50,59 +40,33 @@ export default (sequelize) => {
       },
       created_at: {
         type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: DataTypes.NOW,
+        allowNull: false,
+        defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
       },
       updated_at: {
         type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: DataTypes.NOW,
+        defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
       },
-
       deleted_at: {
         type: DataTypes.DATE,
-        allowNull: true,
+        defaultValue: null,
       },
     },
     {
-      tableName: 'employees',
-      timestamps: true, // เปิด timestamps เพื่อ auto-update
+      tableName: 'employee', // เปลี่ยนจาก employees เป็น employee
+      timestamps: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-      indexes: [
-
-        {
-          name: 'shop_status_idx', // รวม index ของ shop_id และ status
-          fields: ['shop_id', 'status']
-        }
-      ],
-      // เพิ่ม hooks สำหรับ password hashing
-      hooks: {
-        beforeCreate: async (employee) => {
-          if (employee.password) {
-            // ใส่ logic hash password ที่นี่
-            // const bcrypt = require('bcrypt');
-            // employee.password = await bcrypt.hash(employee.password, 10);
-          }
-        },
-        beforeUpdate: async (employee) => {
-          if (employee.changed('password')) {
-            // ใส่ logic hash password ที่นี่
-            // const bcrypt = require('bcrypt');
-            // employee.password = await bcrypt.hash(employee.password, 10);
-          }
-        }
-      }
+      deletedAt: 'deleted_at',
+      collate: 'utf8mb4_unicode_ci',
+      paranoid: true,
     }
   );
 
-  // เพิ่ม instance methods
-  Employee.prototype.getFullName = function () {
-    return `${this.first_name} ${this.last_name}`;
-  };
-
-  Employee.prototype.isActive = function () {
-    return this.status === 'ACTIVE';
+  // Define associations
+  Employee.associate = (models) => {
+    Employee.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
+    Employee.hasMany(models.EmployeeRole, { foreignKey: 'employee_id', as: 'roles', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
   };
 
   return Employee;

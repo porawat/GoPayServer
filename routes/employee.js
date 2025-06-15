@@ -1,4 +1,3 @@
-// routes/employee.js
 import express from 'express';
 import bcrypt from 'bcrypt';
 import db from '../db/index.js';
@@ -7,12 +6,16 @@ import { Op } from 'sequelize';
 
 const router = express.Router();
 
-const Employee = db.employee;
-const EmployeeRole = db.employeeRole;
-const Shop = db.shop;
+const Employee = db.Employee; // เปลี่ยนจาก db.employee
+const EmployeeRole = db.EmployeeRole; // เปลี่ยนจาก db.employeeRole
+const Shop = db.Shop; // เปลี่ยนจาก db.shop
 
 // Debugging database configuration
-console.log('Employee model shop_id type:', Employee.rawAttributes.shop_id.type);
+if (!Employee) {
+  console.error('Employee model is not defined');
+} else {
+  console.log('Employee model shop_id type:', Employee.getAttributes().shop_id.type);
+}
 
 const checkRole = (roles) => {
   return (req, res, next) => {
@@ -28,13 +31,17 @@ const checkRole = (roles) => {
   };
 };
 
-// เพิ่ม route สำหรับดึงพนักงานทั้งหมดของร้านค้า
+// ดึงพนักงานทั้งหมดของร้านค้า
 router.get('/shop/:shopId', verifyToken, checkRole(['admin', 'Admin User']), async (req, res) => {
   console.log('GET /employees/shop/:shopId received:', req.params);
   const { shopId } = req.params;
 
   try {
-    // ตรวจสอบว่ามีร้านค้านี้อยู่จริงหรือไม่
+    if (!Shop) throw new Error('Shop model is not defined');
+    if (!Employee) throw new Error('Employee model is not defined');
+    if (!EmployeeRole) throw new Error('EmployeeRole model is not defined');
+
+    // ตรวจสอบร้านค้า
     const shop = await Shop.findOne({ where: { id: shopId } });
     if (!shop) {
       return res.status(404).json({ message: 'ไม่พบร้านค้า' });
@@ -45,12 +52,12 @@ router.get('/shop/:shopId', verifyToken, checkRole(['admin', 'Admin User']), asy
       include: [{ model: EmployeeRole, as: 'roles', attributes: ['role'] }],
     });
 
-    // แปลงข้อมูลให้อยู่ในรูปแบบที่ frontend ต้องการ
-    const formattedEmployees = employees.map(employee => {
-      const roles = employee.roles ? employee.roles.map(r => r.role) : [];
+    // แปลงข้อมูล
+    const formattedEmployees = employees.map((employee) => {
+      const roles = employee.roles ? employee.roles.map((r) => r.role) : [];
       return {
         ...employee.toJSON(),
-        roles
+        roles,
       };
     });
 
@@ -66,7 +73,10 @@ router.post('/', verifyToken, checkRole(['admin', 'Admin User']), async (req, re
   const { shop_id, first_name, last_name, email, password, phone, roles, status } = req.body;
 
   try {
-    // Debugging line to check shop_id type
+    if (!Shop) throw new Error('Shop model is not defined');
+    if (!Employee) throw new Error('Employee model is not defined');
+    if (!EmployeeRole) throw new Error('EmployeeRole model is not defined');
+
     console.log('Shop ID type:', typeof shop_id, 'Value:', shop_id);
 
     const shop = await Shop.findOne({ where: { id: shop_id } });
@@ -109,6 +119,9 @@ router.put('/:id', verifyToken, checkRole(['admin', 'Admin User']), async (req, 
   const { first_name, last_name, email, phone, roles, status } = req.body;
 
   try {
+    if (!Employee) throw new Error('Employee model is not defined');
+    if (!EmployeeRole) throw new Error('EmployeeRole model is not defined');
+
     const employee = await Employee.findByPk(id);
     if (!employee) {
       return res.status(404).json({ message: 'ไม่พบพนักงาน' });
@@ -142,6 +155,9 @@ router.get('/:id', verifyToken, checkRole(['admin', 'Admin User']), async (req, 
   const { id } = req.params;
 
   try {
+    if (!Employee) throw new Error('Employee model is not defined');
+    if (!EmployeeRole) throw new Error('EmployeeRole model is not defined');
+
     const employee = await Employee.findByPk(id, {
       include: [{ model: EmployeeRole, as: 'roles', attributes: ['role'] }],
     });
@@ -158,21 +174,20 @@ router.get('/:id', verifyToken, checkRole(['admin', 'Admin User']), async (req, 
   }
 });
 
-// เพิ่ม route สำหรับลบพนักงาน (ถ้าต้องการ)
 router.delete('/:id', verifyToken, checkRole(['admin', 'Admin User']), async (req, res) => {
   console.log('DELETE /employees/:id received:', req.params);
   const { id } = req.params;
 
   try {
+    if (!Employee) throw new Error('Employee model is not defined');
+    if (!EmployeeRole) throw new Error('EmployeeRole model is not defined');
+
     const employee = await Employee.findByPk(id);
     if (!employee) {
       return res.status(404).json({ message: 'ไม่พบพนักงาน' });
     }
 
-    // ลบ roles ที่เกี่ยวข้องก่อน
     await EmployeeRole.destroy({ where: { employee_id: id } });
-    
-    // ลบพนักงาน
     await employee.destroy();
 
     res.status(200).json({ message: 'ลบพนักงานเรียบร้อย' });

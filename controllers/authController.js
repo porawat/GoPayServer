@@ -1,4 +1,3 @@
-// controllers/authController.js
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../db/index.js';
@@ -6,7 +5,7 @@ import { config } from 'dotenv';
 
 config();
 
-const User = db.user;
+const User = db.User; // ใช้ตัวพิมพ์ใหญ่ให้ตรงกับ db/index.js
 
 const login = async (req, res) => {
   const { username, password } = req.body;
@@ -15,7 +14,10 @@ const login = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ where: { username } });
+    const user = await User.findOne({
+      where: { username },
+      include: [{ model: db.Shop, as: 'shops' }], // ดึงข้อมูลร้านค้าที่เกี่ยวข้อง
+    });
     if (!user) {
       return res.status(400).json({ message: 'ไม่พบผู้ใช้' });
     }
@@ -34,7 +36,13 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     );
-    res.json({ token, role: user.role, username: user.username });
+    res.json({
+      token,
+      role: user.role,
+      username: user.username,
+      userId: user.id,
+      owner: user.shops?.length > 0 ? user.shops[0].owner_id : user.id, // ใช้ owner_id จาก shops หรือ user.id
+    });
   } catch (error) {
     console.error('ข้อผิดพลาดในการล็อกอิน:', error);
     res.status(500).json({ message: 'ข้อผิดพลาดของเซิร์ฟเวอร์', error: error.message });
@@ -92,7 +100,7 @@ const updateProfile = async (req, res) => {
   try {
     const user = await User.findOne({ where: { id: req.user.id } });
     if (!user) {
-      return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
+      return res.status(404).json({ message: 'ไม่พบผู้ใช้' }); // แก้ไข syntax error
     }
 
     await user.update({ email, full_name, phone: phone || null });
@@ -125,7 +133,6 @@ const getDashboard = async (req, res) => {
 };
 
 const getSettings = async (req, res) => {
-  // console.log('req.user:', req.user)
   if (req.user.role !== 'admin') {
     return res.status(403).json({ code: 5000, message: 'ปฏิเสธการเข้าถึง: เฉพาะผู้ดูแลระบบเท่านั้น' });
   }
