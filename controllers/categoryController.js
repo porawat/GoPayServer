@@ -1,26 +1,26 @@
 import db from '../db/index.js';
 const { Category } = db;
 
-const getcategoryList = async (req, res) => {
-    try {
-        const categoryList = await Category.findAll({
-            where: {
-                active: 'ACTIVE',
-            },
-        });
-        return res.status(200).json({
-            code: 1000,
-            message: 'ดึงข้อมูลหมวดหมู่สำเร็จ',
-            data: categoryList || [],
-        });
-    }
-    catch (error) {
-        console.error('ข้อผิดพลาดในการดึงข้อมูลหมวดหมู่:', error);
-        return res.status(500).json({
-            code: 500,
-            message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
-        });
-    }
+const getCategories = async (req, res) => {
+  try {
+    const categoryList = await Category.findAll({
+      where: {
+        active: 'ACTIVE',
+        deleted_at: null,
+      },
+      attributes: ['category_id', 'cat_name'],
+    });
+    return res.status(200).json({
+      code: 1000,
+      datarow: categoryList || [],
+    });
+  } catch (error) {
+    console.error('ข้อผิดพลาดในการดึงข้อมูลหมวดหมู่:', error);
+    return res.status(500).json({
+      code: 5000,
+      message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
+    });
+  }
 };
 
-export { getcategoryList };
+export { getCategories };
