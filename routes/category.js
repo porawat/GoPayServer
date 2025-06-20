@@ -1,10 +1,8 @@
 import express from 'express';
-import { getcategoryList } from '../controllers/categoryController.js';
-import { verifyToken } from '../middleware/auth.js';
+import { getCategories } from '../controllers/categoryController.js';
 
 const router = express.Router();
 
-router.get('/', verifyToken, getcategoryList);
-
+router.get('/', getCategories);
 
 export default router;

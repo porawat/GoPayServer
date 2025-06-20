@@ -12,6 +12,7 @@ import productMasterRouter from './routes/productmasterRouter.js';
 import employeeRoutes from './routes/employee.js';
 import categoryRoutes from './routes/category.js';
 import customerRoutes from './routes/customerRouter.js';
+import supplierRouter from  './routes/suppliersRouter.js'
 import db from './db/index.js';
 
 config();
@@ -36,10 +37,11 @@ syncDatabase();
 const app = express();
 
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' ? process.env.CLIENT_URL : 'http://localhost:5173',
+  origin: process.env.NODE_ENV === 'production' ? process.env.CLIENT_URL :
+   ['http://localhost:5173', 'http://localhost:3030'],
   optionsSuccessStatus: 200,
 };
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
 
@@ -55,6 +57,7 @@ app.use('/product', productRoutes);
 app.use('/productmaster', productMasterRouter);
 app.use('/category', categoryRoutes);
 app.use('/customer', customerRoutes);
+app.use('/supplier',supplierRouter)
 
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);
