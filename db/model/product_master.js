@@ -79,7 +79,7 @@ export default (sequelize) => {
   // Define associations
   ProductMaster.associate = (models) => {
     ProductMaster.belongsTo(models.Category, { foreignKey: 'category_id', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
-    ProductMaster.belongsTo(models.Supplier, { foreignKey: 'supplier_id', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
+  //  ProductMaster.belongsTo(models.Supplier, { foreignKey: 'supplier_id', onDelete: 'SET NULL', onUpdate: 'CASCADE' });
   };
 
   return ProductMaster;

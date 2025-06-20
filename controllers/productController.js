@@ -1,7 +1,7 @@
 //backend/controllers/productController.js
 import db from '../db/index.js';
 import { Op } from 'sequelize';
-
+import { v4 as uuidv4 } from 'uuid';
 const { Product, Warehouse, Category, Supplier } = db;
 
 export const getmyproduct = async (req, res) => {
@@ -111,6 +111,7 @@ export const createProduct = async (req, res) => {
     }
 
     const productsToCreate = products.map(product => ({
+      product_uid: uuidv4(),
       product_id: product.product_id,
       shop_id: product.shop_id,
       price: product.price,

@@ -1,22 +1,18 @@
 import db from '../db/index.js';
-
-export const getSuppliers = async (req, res) => {
+const {Supplier} = db;
+ const getSuppliers = async (req, res) => {
   try {
-    const query = `
-      SELECT supplier_id, name, contact_info
-      FROM supplier
-      WHERE status = 'ACTIVE' AND deleted_at IS NULL
-    `;
-    const [rows] = await db.query(query);
-    console.log('Suppliers fetched:', JSON.stringify(rows, null, 2));
+    const result = await Supplier.findAll();
+    // console.log('Suppliers fetched:', JSON.stringify(result, null, 2));
 
-    res.status(200).json({
+    res.status(200).json({ // <-- แก้จาก satus เป็น status
       code: 1000,
-      datarow: rows,
+      datarow: result,
       message: 'Success',
     });
   } catch (error) {
     console.error('Error fetching suppliers:', error);
-    res.status(500).json({ code: 1002, message: 'Internal server error' });
+    res.status(500).json({ code: 5000, message: 'Internal server error' });
   }
 };
+export {getSuppliers}

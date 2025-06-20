@@ -29,6 +29,7 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@locator/babel-jsx": "^0.4.4",
     "eslint": "^9.0.0",
     "eslint-plugin-react": "^7.34.1",
     "nodemon": "^3.0.1",

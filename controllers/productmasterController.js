@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 const { ProductMaster, Category, Product, Shop, Supplier, Warehouse } = db;
 
 const createProductMaster = async (req, res) => {
+ 
   const {
     sku,
     name,
@@ -20,10 +21,36 @@ const createProductMaster = async (req, res) => {
     return res.status(401).json({ code: 401, message: 'ต้องล็อกอินเพื่อเพิ่มสินค้า' });
   }
 
+  // Validate required fields
+  if (!sku || !name || !category_id ) {
+    return res.status(400).json({
+      code: 400,
+      message: 'กรุณาระบุข้อมูลที่จำเป็น (sku, name, category_id, supplier_id, cost_price, selling_price)',
+    });
+  }
+
+  const dataPost = {
+    product_id: uuidv4(),
+    sku,
+    name,
+    description: description || null,
+    category_id,
+    supplier_id,
+    cost_price: parseFloat(cost_price),
+    selling_price: parseFloat(selling_price),
+    reorder_level: reorder_level != null ? parseInt(reorder_level) : null,
+    image_url: image_url || null,
+    status: 'ACTIVE',
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
+
+
   try {
+    // Validate category
     if (category_id) {
       const category = await Category.findByPk(category_id);
-      if (!category || category.status !== 'ACTIVE') {
+      if (!category || category?.dataValues?.active !== 'ACTIVE') {
         return res.status(400).json({
           code: 400,
           message: 'หมวดหมู่ไม่ถูกต้องหรือไม่ได้ใช้งาน',
@@ -31,19 +58,38 @@ const createProductMaster = async (req, res) => {
       }
     }
 
-    const newProductMaster = await ProductMaster.create({
-      sku,
-      name,
-      description,
-      category_id,
-      supplier_id,
-      cost_price,
-      selling_price,
-      reorder_level,
-      image_url,
-      status: 'ACTIVE',
-    });
-
+   
+   const [result] = await db.sequelize.query(
+      `INSERT INTO product_master 
+        (product_id, sku, name, description, category_id, supplier_id,cost_price, selling_price, reorder_level, image_url, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?)`,
+      {
+        replacements: [
+          dataPost.product_id,
+          dataPost.sku,
+          dataPost.name,
+          dataPost.description,
+          dataPost.category_id,
+          dataPost.supplier_id,
+          dataPost.cost_price,
+          dataPost.selling_price,
+          dataPost.reorder_level,
+          dataPost.image_url,
+          dataPost.status,
+          dataPost.created_at,
+          dataPost.updated_at,
+        ],
+        type: db.sequelize.QueryTypes.INSERT,
+      }
+    );
+    const [rows] = await db.sequelize.query(
+  `SELECT * FROM product_master WHERE product_id = ? LIMIT 1`,
+  {
+    replacements: [dataPost.product_id],
+    type: db.sequelize.QueryTypes.SELECT,
+  }
+);
+const newProductMaster = rows;
     return res.status(201).json({
       code: 1000,
       message: 'เพิ่มสินค้าสำเร็จ',
@@ -52,12 +98,12 @@ const createProductMaster = async (req, res) => {
   } catch (error) {
     console.error('ข้อผิดพลาดในการเพิ่มสินค้า:', error.message, error.stack);
     return res.status(500).json({
-      code: 500,
+      code: 5000,
       message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
     });
   }
 };
-
+// ...existing code...
 const getProductMasterList = async (req, res) => {
   console.log('getProductMasterList');
   try {

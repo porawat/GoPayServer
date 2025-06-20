@@ -8,7 +8,7 @@ const getCategories = async (req, res) => {
         active: 'ACTIVE',
         deleted_at: null,
       },
-      attributes: ['category_id', 'cat_name'],
+      attributes: ['category_id', 'cat_name','cat_prefix'],
     });
     return res.status(200).json({
       code: 1000,
